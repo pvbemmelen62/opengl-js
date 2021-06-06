@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="Util.js"></script>
+<script src="Debug.js"></script>
+<script>
+window.debug = Debug.createFunction("preId", false, 40);
+</script>
+<script src="Vector.js"></script>
+<script src="VectorH.js"></script>
+<script src="Matrix.js"></script>
+<script src="MatrixH.js"></script>
+<script src="ViewMatrix.js"></script>
+
+</head>
+<body onload="myLoad()">
+<pre id="preId">
+</pre>
+
+<script>
+function myLoad() {
+  var eye = [30,30,30];
+  var lookat = [10,10,0];
+  var up = [0,0,1];
+  var vm = new ViewMatrix(eye,lookat,up);
+  var m = vm.getMatrix();
+  debug(JSON.stringify(m));
+  var x = MatrixH.map3D(m,lookat);
+  debug(`lookat: ${lookat}  --> ${x}`);
+  var x = MatrixH.map3D(m,eye);
+  debug(`eye: ${eye}  --> ${x}`);
+}
+</script>
+
+</body>
+</html>

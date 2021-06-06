@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="Util.js"></script>
+<script src="Debug.js"></script>
+<script>
+window.debug = Debug.createFunction("preId", false, 40);
+</script>
+<script src="Matrix.js"></script>
+<script src="Frustum.js"></script>
+<script src="VectorH.js"></script>
+
+</head>
+<body onload="myLoad()">
+<pre id="preId">
+</pre>
+
+<script>
+function myLoad() {
+  var sf = JSON.stringify;
+  var m = Frustum.getMatrixFovy(20,800/400,30,80);
+  debug(Matrix.toString(m));
+
+  var lrbtnf = Frustum.paramFromFovy(20,800/400,30,80);
+  debug(sf(lrbtnf));
+
+  var M = new Matrix(m);
+  var prm = lrbtnf;
+
+  debug("Frustum left,bottom,near corner:");
+  var lbn = VectorH.from3D([prm.left, prm.bottom, -prm.near]);
+  var p = M.multiply(lbn);
+  var q = VectorH.to3D(p);
+  debug(sf(lbn) + " --> " + sf(q));
+
+  debug("Frustum left,bottom,far corner:");
+  var scale = prm.far/prm.near;
+  var lbf = VectorH.from3D([scale*prm.left, scale*prm.bottom, -scale*prm.near]);
+  var p = M.multiply(lbf);
+  var q = VectorH.to3D(p);
+  debug(sf(lbf) + " --> " + sf(q));
+
+}
+</script>
+
+</body>
+</html>
