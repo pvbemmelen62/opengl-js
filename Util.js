@@ -1,12 +1,26 @@
 
-function sqr(x) {
+function Util() {
+}
+
+Util.sqr = function(x) {
   return x*x;
 }
-function assert(x) {
+Util.assert = function(x) {
   if(!x) {
     throw "Assertion failed";
   }
 }
-function sameType(a,b) {
+Util.sameType = function(a,b) {
   return a.constructor === b.constructor;
+}
+Util.cosDeg = function(a) {
+  return Math.cos(a*Math.PI/180);
+}
+Util.sinDeg = function(a) {
+  return Math.sin(a*Math.PI/180);
+}
+Util.partitionInterval = function(interval, incrMax) {
+  var num = Math.ceil(interval/incrMax);
+  var incr = interval/num;
+  return {num: num, incr: incr};
 }

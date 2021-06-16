@@ -63,8 +63,12 @@ Matrix.unary = function(m, func) {
   }
   return result;
 };
+Matrix.scale = function(m, scale) {
+  var rv = Matrix.unary(m, x => scale*x);
+  return rv;
+}
 Matrix.binary = function(m0,m1,func) {
-  assert(Util.sameType(m0, m1));
+  Util.assert(Util.sameType(m0, m1));
   var isMatrix = (m0 instanceof Matrix);
   if(isMatrix) {
     m0 = m0.m;
@@ -83,6 +87,14 @@ Matrix.binary = function(m0,m1,func) {
   }
   return result;
 };
+Matrix.add = function(m0,m1) {
+  var rv = Matrix.binary(m0,m1,(x,y) => (x+y));
+  return rv;
+}
+Matrix.subtract = function(m0,m1) {
+  var rv = Matrix.binary(m0,m1,(x,y) => (x-y));
+  return rv;
+}
 Matrix.accumulate = function(m,func,initial) {
   var isMatrix = (m instanceof Matrix);
   if(isMatrix) {
@@ -101,18 +113,23 @@ Matrix.transpose = function(m) {
   if(isMatrix) {
     m = m.m;
   }
-  var nr = this.m.length;
-  var nc = this.m[0].length;
-  var m2 = Matrix.zeros(nc, nr);
+  if(!Array.isArray(m[0])) {
+    throw "m must be two dimensional."
+  }
+  var nr = m.length;
+  var nc = m[0].length;
+  var rv = Matrix.zeros(nc, nr);
+  var r;
+  var c;
   for(r=0; r<nr; ++r) {
     for(c=0; c<nc; ++c) {
-      m2[c][r] = this.m[r][c];
+      rv[c][r] = m[r][c];
     }
   }
   if(isMatrix) {
-    m2 = new Matrix(m2);
+    rv = new Matrix(rv);
   }
-  return m2;
+  return rv;
 };
 Matrix.inverse = function(m) {
   var isMatrix = (m instanceof Matrix);
@@ -260,6 +277,15 @@ Matrix.solve = function(m, b) {
 Matrix.prototype = {
   toString : function() {
     return Matrix.toString(this);
+  },
+  scale : function(scale) {
+    return Matrix.scale(this, scale);
+  },
+  add : function(m) {
+    return Matrix.add(this,m);
+  },
+  subtract : function(m) {
+    return Matrix.subtract(this,m);
   },
   transpose : function() {
     return Matrix.transpose(this);

@@ -41,12 +41,12 @@ Frustum.getMatrixLRBTNF = function(l,r,b,t,n,f) {
     [   0   ,   0    ,   0   ,   1 ]
   ]);
 
-  var T = [
+  var T = new Matrix( [
    [ 2*n ,  0  ,  r+l ,   0     ],
    [  0  , 2*n ,  t+b ,   0     ],
    [  0  ,  0  ,  f+n ,  2*f*n  ],
    [  0  ,  0  ,   -1 ,   0     ]
-  ];
+  ]);
 
   var ST = S.multiply(T);
   return ST;

@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+canvas {
+  border-width: medium;
+  border-style: solid;
+  border-color: black;
+}
+</style>
+<script src="Debug.js"></script>
+<script src="Util.js"></script>
+<script src="Vector.js"></script>
+<script src="VectorH.js"></script>
+<script src="Matrix.js"></script>
+<script src="Matrix2dst.js"></script>
+<script src="ViewMatrix.js"></script>
+<script src="Frustum.js"></script>
+<script src="OpenGL.js"></script>
+</head>
+<body onload="myOnLoad()">
+<h1>OpenGL Demo</h1>
+<canvas id="canvas" width="800" height="400"></canvas>
+<button onclick="app.rotateEye()">Rotate eye</button>
+<pre id="preDebug"></pre>
+<script>
+let sf = JSON.stringify;
+let debug = Debug.createFunction("preDebug", true, 40);
+
+function App() {
+  this.canvas = null;
+  this.lines = [];
+  this.arcs = [];
+  this.texts = [];
+}
+App.prototype = {
+  init : function() {
+    this.canvas = document.getElementById("canvas");
+    this.calcRotationEye();
+    if(!this.canvas.getContext) {
+      alert(`Error: no canvas.getContext`);
+      return;
+    }
+    this.context = this.canvas.getContext('2d');
+    this.opengl = new OpenGL();
+    var ogl = this.opengl;
+    ogl.setEye([4,4,2]);
+    ogl.setLookat([0,0,0]);
+    ogl.setUp([0,0,1]);
+    ogl.setCanvasWidth(this.canvas.width);
+    ogl.setCanvasHeight(this.canvas.height);
+    ogl.setFovy(30);
+    ogl.setNear(2);
+    ogl.setFar(8);
+    ogl.calcCPV();
+    this.scaleAxis = 1.5;
+    var line;
+    line = new OpenGL.Line({p0:[-1, 0, 0], p1:[1,0,0]}).scale(this.scaleAxis);
+    this.lines.push(line);
+    line = new OpenGL.Line({p0:[ 0,-1, 0], p1:[0,1,0]}).scale(this.scaleAxis);
+    this.lines.push(line);
+    line = new OpenGL.Line({p0:[ 0, 0,-1], p1:[0,0,1]}).scale(this.scaleAxis);
+    this.lines.push(line);
+    var arc;
+    arc = new OpenGL.Arc({angle: 180, axis: [0,0,1], center: [0,0,0], point: [1,0,0]});
+    this.arcs.push(arc);
+
+    var rotZ = new OpenGL.Rotation(60, [0,0,1]);
+
+    var p = rotZ.R.multiply([1,0,0]);
+    line = new OpenGL.Line({p0:[0,0,0], p1:p});
+    this.lines.push(line);
+
+    var axis = rotZ.R.multiply([0,-1,0]);
+    arc = new OpenGL.Arc({angle: 180, axis: axis, center: [0,0,0], point: [0,0,-1]});
+    this.arcs.push(arc);
+
+    var rotZ = new OpenGL.Rotation(70, [0,0,1]);
+
+    var axis = rotZ.R.multiply([0,-1,0]);
+    arc = new OpenGL.Arc({angle: 180, axis: axis, center: [0,0,0], point: [0,0,-1]});
+    this.arcs.push(arc);
+
+    var text;
+    text = new OpenGL.Text({text: "x", point: [this.scaleAxis,0,0]});
+    this.texts.push(text);
+    text = new OpenGL.Text({text: "y", point: [0,this.scaleAxis,0]});
+    this.texts.push(text);
+    text = new OpenGL.Text({text: "z", point: [0,0,this.scaleAxis]});
+    this.texts.push(text);
+  },
+  draw : function() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.lines.forEach(line => line.draw(this.opengl, this.context));
+    this.arcs.forEach(arc => arc.draw(this.opengl, this.context));
+    this.texts.forEach(text => text.draw(this.opengl, this.context));
+  },
+  calcRotationEye : function() {
+    this.rotationEye = new OpenGL.Rotation(-10, [0,0,1]);
+  },
+  rotateEye : function() {
+    var ogl = this.opengl;
+    var eye = this.rotationEye.R.multiply(ogl.eye);
+    ogl.setEye(eye);
+    this.draw();
+  }
+}
+
+function myOnLoad() {
+  window.app = new App();
+  var app = window.app;
+  app.init();
+  app.draw();
+}
+</script>
+</body>
+</html>
+

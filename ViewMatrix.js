@@ -30,8 +30,8 @@ ViewMatrix.prototype = {
       [0, 0, 0,  1     ]
     ]
     var M = new Matrix(M);
-    debug(JSON.stringify(M));
-    debug(JSON.stringify(T));
+    //debug(JSON.stringify(M));
+    //debug(JSON.stringify(T));
     var rv = M.multiply(T);
     return new Matrix(rv);
   },

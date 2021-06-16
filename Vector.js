@@ -1,13 +1,4 @@
 
-function sqr(x) {
-  return x*x;
-}
-function assert(x) {
-  if(!x) {
-    throw "Assertion failed";
-  }
-}
-
 function Vector(arr) {
   this.arr = arr;
 }
@@ -19,19 +10,48 @@ Vector._length = function(v) {
   var lenSqr = 0;
   var i;
   for(i=0; i<v.length; ++i) {
-    lenSqr += sqr(v[i]);
+    lenSqr += Util.sqr(v[i]);
   }
   var len = Math.sqrt(lenSqr);
   return len;
 }
+Vector.negate = function(v) {
+  var isVector = (v instanceof Vector);
+  if(isVector) {
+    v = v.arr;
+  }
+  var rv = new Array(v.length);
+  for(i=0; i<v.length; ++i) {
+    rv[i] = -v[i];
+  }
+  if(isVector) {
+    rv = new Vector(rv);
+  }
+  return rv;
+}
+Vector.unary = function(f,v) {
+  var isVector = (v instanceof Vector);
+  if(isVector) {
+    v = v.arr;
+  }
+  var i;
+  var rv = new Array(v.length);
+  for(i=0; i<v.length; ++i) {
+    rv[i] = f(v[i]);
+  }
+  if(isVector) {
+    rv = new Vector(rv);
+  }
+  return rv;
+}
 Vector.binary = function(f,v,w) {
-  assert(Util.sameType(v, w));
+  Util.assert(Util.sameType(v, w));
   var isVector = (v instanceof Vector);
   if(isVector) {
     v = v.arr;
     w = w.arr;
   }
-  assert(v.length == w.length);
+  Util.assert(v.length == w.length);
   var i;
   var rv = new Array(v.length);
   for(i=0; i<v.length; ++i) {
@@ -40,6 +60,10 @@ Vector.binary = function(f,v,w) {
   if(isVector) {
     rv = new Vector(rv);
   }
+  return rv;
+}
+Vector.scale = function(s,v) {
+  var rv = Vector.unary(v => s*v, v);
   return rv;
 }
 Vector.subtract = function(v,w) {
@@ -67,13 +91,13 @@ Vector.normalize = function(v) {
   return cp;
 }
 Vector.outerProduct = function(v,w) {
-  assert(Util.sameType(v, w));
+  Util.assert(Util.sameType(v, w));
   var isVector = (v instanceof Vector);
   if(isVector) {
     w = w.arr;
     v = v.arr;
   }
-  assert(v.length==3 && w.length==3);
+  Util.assert(v.length==3 && w.length==3);
   var rv = [
     v[1]*w[2]-v[2]*w[1],
     v[2]*w[0]-v[0]*w[2],
