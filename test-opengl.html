@@ -21,7 +21,9 @@ canvas {
 <body onload="myOnLoad()">
 <h1>OpenGL Demo</h1>
 <canvas id="canvas" width="800" height="400"></canvas>
-<button onclick="app.rotateEye()">Rotate eye</button>
+<button onmousedown="app.mouseDown('left')" onmouseup="app.mouseUp('left')">left</button>
+<span>Rotate</span>
+<button onmousedown="app.mouseDown('right')" onmouseup="app.mouseUp('right')">right</button>
 <pre id="preDebug"></pre>
 <script>
 let sf = JSON.stringify;
@@ -72,7 +74,7 @@ App.prototype = {
     this.lines.push(line);
 
     var axis = rotZ.R.multiply([0,-1,0]);
-    arc = new OpenGL.Arc({angle: 180, axis: axis, center: [0,0,0], point: [0,0,-1]});
+    arc = new OpenGL.Arc({angle: 180, axis: axis, center: [0,0,0], point: [0,0,-1], arrow:true});
     this.arcs.push(arc);
 
     var rotZ = new OpenGL.Rotation(70, [0,0,1]);
@@ -96,13 +98,30 @@ App.prototype = {
     this.texts.forEach(text => text.draw(this.opengl, this.context));
   },
   calcRotationEye : function() {
-    this.rotationEye = new OpenGL.Rotation(-10, [0,0,1]);
+    this.rotationEyePlus = new OpenGL.Rotation(3, [0,0,1]);
+    this.rotationEyeMinus = new OpenGL.Rotation(-3, [0,0,1]);
+  },
+  mouseDown : function(dir) {
+    this.isMouseDown = true;
+    if(dir=='left') {
+      this.rotationEye = this.rotationEyePlus;
+    }
+    else {
+      this.rotationEye = this.rotationEyeMinus;
+    }
+    this.rotateEye();
+  },
+  mouseUp : function() {
+    this.isMouseDown = false;
   },
   rotateEye : function() {
     var ogl = this.opengl;
     var eye = this.rotationEye.R.multiply(ogl.eye);
     ogl.setEye(eye);
     this.draw();
+    if(this.isMouseDown) {
+      setTimeout(() => { this.rotateEye(); }, 50);
+    }
   }
 }
 

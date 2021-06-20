@@ -152,12 +152,32 @@ OpenGL.Arc = function(spec) {
   this.angle = spec.angle;
   var angleIncrMax = this.angleIncrMax || OpenGL.Arc.angleIncrMax;
   this.partition = Util.partitionInterval(this.angle, angleIncrMax);
-  this.rotation = new OpenGL.Rotation(this.partition.incr, this.axis);
+  // arrowhead
+  var arrowAngle = this.angle - 2;
+  this.rotation = new OpenGL.Rotation(arrowAngle, this.axis);
   this.vector = Vector.subtract(this.point, this.center);
+  var vecRot = this.rotation.R.multiply(this.vector);
+  if(spec.arrow) {
+    this.arrow = {};
+    this.arrow.point = Vector.add(this.center, vecRot);
+    var direction = Vector.normalize(Vector.outerProduct(this.axis, vecRot));
+    this.arrow.tangent = Vector.add(this.arrow.point, direction);
+    var arrowBase = Vector.scale(-0.10, direction);
+    var arrowTipAngle = 20;
+    this.rotation.applyAngle(arrowTipAngle);
+    var tip = this.rotation.R.multiply(arrowBase);
+    this.arrow.tipPlus = Vector.add(this.arrow.point, tip);
+    this.rotation.applyAngle(-arrowTipAngle);
+    var tip = this.rotation.R.multiply(arrowBase);
+    this.arrow.tipMinus = Vector.add(this.arrow.point, tip);
+  }
+  // arc approximation:
+  this.rotation.applyAngle(this.partition.incr);
 }
 OpenGL.Arc.strokeStyle = "#000000";
 OpenGL.Arc.lineDash = [];
 OpenGL.Arc.angleIncrMax = 5;
+OpenGL.Arc.arrowHead = null;
 
 OpenGL.Arc.prototype = {
   draw : function(ogl, ctx) {
@@ -169,20 +189,28 @@ OpenGL.Arc.prototype = {
     var Y = 1;
     var vi = this.vector;
     var p = Vector.add(this.center, vi);
-    var pH = VectorH.from3D(p);
-    var q = VectorH.to3D(ogl.mapPoint(pH));
+    var q = ogl.mapPoint(p);
     ctx.beginPath();
     ctx.moveTo(q[X],q[Y]);
     for(i=0; i<num; ++i) {
       vi = this.rotation.R.multiply(vi);
       p = Vector.add(this.center, vi);
-      pH = VectorH.from3D(p);
-      q = VectorH.to3D(ogl.mapPoint(pH));
+      q = ogl.mapPoint(p);
       ctx.lineTo(q[X],q[Y]);
     }
     ctx.strokeStyle = strokeStyle;
     ctx.setLineDash(lineDash);
     ctx.stroke();
+    if(this.arrow) {
+      ctx.beginPath();
+      var q = ogl.mapPoint(this.arrow.tipPlus);
+      ctx.moveTo(q[X], q[Y]);
+      q = ogl.mapPoint(this.arrow.point);
+      ctx.lineTo(q[X], q[Y]);
+      q = ogl.mapPoint(this.arrow.tipMinus);
+      ctx.lineTo(q[X], q[Y]);
+      ctx.stroke();
+    }
   }
 }
 OpenGL.Line = function(spec) {
